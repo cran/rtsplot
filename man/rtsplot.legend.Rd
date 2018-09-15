@@ -35,3 +35,13 @@ nothing
 \description{
 Plot legend - shortcut to the \code{\link{legend}} function
 }
+\examples{
+y = rtsplot.fake.stock.data(1000)
+symbol = 'SPY'
+	
+ # plot
+ layout(1)
+ rtsplot(y, type = 'l', col='black')
+rtsplot.legend(symbol, 'black', y)
+
+}

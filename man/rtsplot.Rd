@@ -4,13 +4,12 @@
 \name{rtsplot}
 \alias{rtsplot}
 \alias{rtsplot-package}
-\alias{rtsplot}
 \title{`rtsplot` - Time series plot with base R Graphics.}
 \usage{
 rtsplot(y, main = NULL, plotX = TRUE, LeftMargin = 0, grid = "xy",
   x.highlight = NULL, y.highlight = NULL, y.highlight.col = NULL,
-  las = 1, type = "l", xlab = "", ylab = "", ylim = NULL, log = "",
-  ...)
+  las = 1, type = "l", xlab = "", ylab = "", ylim = NULL,
+  log = "", ...)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}
@@ -51,15 +50,10 @@ nothing
 Plot time series data with base R Graphics.
 
 The `rtsplot` package is **fast** time series plot package with base R Graphics.
-
-Plot function for time series
 }
 \examples{
 # generate time series data
-n = 1000
-x =  seq(Sys.Date(), by = 'day', length.out = n)
-y = cumsum( rnorm(n, sd = sqrt(0.1)) )
-y = xts::xts(y, x)
+y = rtsplot.fake.stock.data(1000)
 symbol = 'Test'
 
 sma = TTR::SMA(y, 250)
@@ -81,15 +75,11 @@ rtsplot(rsi, type = 'l', ylim=c(0,100),
 rtsplot.legend('RSI(20)', 'black', rsi)
 
 
-# generate time series data
-n = 1000
-x =  seq(Sys.Date(), by = 'day', length.out = n)
-y = cumsum( rnorm(n, sd = sqrt(0.1)) )
-y = xts::xts(y, x)
+y = rtsplot.fake.stock.data(1000)
 symbol = 'SPY'
 	
 # simple example
-highlight = which(y < 2)
+highlight = which(y < 10)
 
 # plot
 layout(1)

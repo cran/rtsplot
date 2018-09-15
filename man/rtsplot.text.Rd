@@ -17,3 +17,14 @@ nothing
 \description{
 Add text to time series plot
 }
+\examples{
+y = rtsplot.fake.stock.data(1000)
+symbol = 'SPY'
+	
+ # plot
+ layout(1)
+ rtsplot(y, type = 'l', col='black')
+ rtsplot.text(y[100], 'Text', col='red')
+rtsplot.legend(symbol, 'black', y)
+
+}

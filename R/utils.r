@@ -58,19 +58,6 @@ ifna = function(x, y) iif(is.na(x) | is.nan(x) | is.infinite(x), y, x)
 
 to.date = function(x) if(class(x)[1] != 'Date') as.Date(x, format='%Y-%m-%d') else x
 
-# shortcut for xts index
-indexts = function(x) {
-	temp = attr(x, 'index')
-	class(temp) = c('POSIXct', 'POSIXt')
-  
-	type = attr(x, '.indexCLASS')[1]
-	if( type == 'Date' || type == 'yearmon' || type == 'yearqtr')
-		temp = as.Date(temp)
-	temp
-}
-
-
-
 # set global options
 set.options = function(key, ..., overwrite=TRUE) {
 	values = list(...)

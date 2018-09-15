@@ -12,6 +12,15 @@ The `rtsplot` package is **fast** time series plot package with base R Graphics.
 Installation:
 ===
 
+The current release is available on [CRAN](https://CRAN.R-project.org/package=rtsplot),
+which you can install via:
+
+```r
+install.packages("rtsplot")
+```
+
+To install the development version run following code:
+
 ```R
 remotes::install_bitbucket("rtsvizteam/rtsplot")
 ```
@@ -22,7 +31,6 @@ Example :
 
 ```R
 	library(quantmod)
-	library(rtsdata)
 	
 	symbol = 'AAPL'
 	data = getSymbols(symbol, src = 'yahoo',  auto.assign=F)

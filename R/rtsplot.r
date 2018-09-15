@@ -6,10 +6,7 @@
 #' 
 #' @examples
 #'	# generate time series data
-#'	n = 1000
-#'	x =  seq(Sys.Date(), by = 'day', length.out = n)
-#'	y = cumsum( rnorm(n, sd = sqrt(0.1)) )
-#'	y = xts::xts(y, x)
+#'	y = rtsplot.fake.stock.data(1000)
 #'	symbol = 'Test'
 #'
 #'	sma = TTR::SMA(y, 250)
@@ -133,15 +130,11 @@ rtsplot.colors = function(n) {
 #' @return nothing
 #'
 #' @examples
-#'	# generate time series data
-#'	n = 1000
-#'	x =  seq(Sys.Date(), by = 'day', length.out = n)
-#'	y = cumsum( rnorm(n, sd = sqrt(0.1)) )
-#'	y = xts::xts(y, x)
+#'	y = rtsplot.fake.stock.data(1000)
 #'	symbol = 'SPY'
 #' 	
 #' # simple example
-#' highlight = which(y < 2)
+#' highlight = which(y < 10)
 #' 
 #' # plot
 #' layout(1)
@@ -191,7 +184,7 @@ rtsplot <- function
 	}
 		
 	# create plot frame, do not plot data
-	temp.x = attr(y, 'index')	
+	temp.x = xts::.index(y)
 	graphics::plot( temp.x, y1, xlab = xlab, ylab = ylab, main = main,
 		frame.plot = FALSE,
 		type = 'n', yaxt = 'n', xaxt = 'n', ylim = ylim, log = log, ... )
@@ -230,67 +223,96 @@ rtsplot <- function
 	
 	# plot box
 	#box();
+	
+	invisible(xaxis.ticks)
 }
 
 
 ###############################################################################
 #' Plot time series with second Y axis
 #'
+#' Detailed discussion for validity of dual Y axis at [Dual axes time series plots may be ok sometimes after all](http://freerangestats.info/blog/2016/08/18/dualaxes)
+#'
 #' @param y \code{\link{xts}} object
 #' @param las rotation of Y axis labels, \strong{defaults to 1}, for more info see \code{\link{par}}
 #' @param type plot type, \strong{defaults to 'l'}, for more info see \code{\link{plot}}
 #'			also support 'ohlc', 'hl', 'candle', 'volume' types
+#' @param col.axis axis color, \strong{defaults to 'red'}
+#' @param ylim range on Y values, \strong{defaults to NULL}
+#' @param log log scale x, y, xy axes, \strong{defaults to ''}
 #' @param ... additional parameters to the \code{\link{plot}}
 #'
 #' @return nothing
 #'
 #' @examples
 #'	# generate time series data
-#'	n = 1000
-#'	x =  seq(Sys.Date(), by = 'day', length.out = n)
-#'	y = cumsum( rnorm(n, sd = sqrt(0.1)) )
-#'	y = xts::xts(y, x)
+#'	y = rtsplot.fake.stock.data(1000)
 #'	symbol = 'SPY'
 #'
-#'	y1 = 100 + cumsum( rnorm(n, sd = sqrt(0.1)) )
-#'	y1 = xts::xts(y1, x)
+#'	y1 = rtsplot.fake.stock.data(1000, 100)
 #'	symbol = 'IBM'
 #' 	
-#' # two Y axis example
-#' # to plot second Y axis, free some space on left side, set LeftMargin=3
-#' layout(1)
-#' cols = c('black', 'red')
+#'  # two Y axis example
+#'  # to plot second Y axis, free some space on left side, set LeftMargin=3
+#'  layout(1)
+#'  cols = c('black', 'red')
 #' 
-#' rtsplot(y, type = 'l', LeftMargin=3, col=cols[1])
+#'  rtsplot(y, type = 'l', LeftMargin=3, col=cols[1])
 #' 			
-#' rtsplot2Y(y1, type='l', las=1, col=cols[2], col.axis=cols[2])
+#'  rtsplot2Y(y1, type='l', las=1, col=cols[2], col.axis=cols[2])
 #' 
-#' rtsplot.legend('SPY(rhs),IBM(lhs)', cols, list(y,y1))
+#'  rtsplot.legend('SPY(rhs),IBM(lhs)', cols, list(y,y1))
+#'
 #' @export 
 ###############################################################################
 rtsplot2Y <- function(
 	y,			# xts object to plot
 	las = 1,	# rotation of Y axis labels
 	type = 'l',	# plot type
+	col.axis = 'red',# axis color
+	ylim = NULL,	# range on Y values
+	log = '',	# log scale x, y, xy axes	
 	...			# other parameters to plot
 )
 {
 	# exctract visible plot data
 	xlim = graphics::par('usr')[1:2]
+		class(xlim) = c('POSIXct', 'POSIXt')
 
-	# subset	
-	class(xlim) = c('POSIXct', 'POSIXt')
-	y1 = y[paste(format(xlim, '%Y:%m:%d %H:%M:%S'), sep = '', collapse = '::')]	
+	# subset		
+	y = y[paste(format(xlim, '%Y:%m:%d %H:%M:%S'), sep = '', collapse = '::')]	
 	
-
-	# plot
-	graphics::par(new = TRUE)
-	xlim = graphics::par('usr')[1:2]
-	graphics::plot( attr(y1, 'index') , y1[,1], xlim = xlim, xaxs = 'i', type = type,
-		yaxt = 'n', xaxt = 'n', xlab = '', ylab = '', axes = FALSE, ... )
+	# set plot y range
+	if(quantmod::has.Cl(y)) y1 = quantmod::Cl(y) else y1 = y[,1]
+	if( is.null(ylim) ) {
+		ylim = range(y1, na.rm = TRUE)
+		switch(type,
+			'ohlc' = ,
+			'hl' = ,
+			'candle' = { ylim = range(quantmod::OHLC(y), na.rm = TRUE) },
+			'volume' = { y1 = quantmod::Vo(y); ylim = range(quantmod::Vo(y), na.rm = TRUE) }
+		)
+	}
+	
+	# create plot frame, do not plot data
+	graphics::par(new = TRUE)	
+	temp.x = xts::.index(y1)
+	graphics::plot( temp.x , y1, xlim = xlim, xaxs = 'i', type = 'n',
+		yaxt = 'n', xaxt = 'n', xlab = '', ylab = '', axes = FALSE, ylim = ylim, log = log, ... )
 		
 		# Y axis rotation
-		graphics::axis(2, las = las, ...) 
+		cex = rtsplot.theme()$cex		
+		graphics::axis(2, las = las, col=col.axis, col.axis=col.axis, cex.axis=cex)
+		
+	# plot data
+	switch(type,
+		'candle' = rtsplot.candle(y, ...),
+		'hl' = rtsplot.hl(y, ...),
+		'ohlc' = rtsplot.ohlc(y, ...),
+		'volume' = rtsplot.volume(y, ...),
+		{  graphics::lines(temp.x, y1, type=type, ...) }
+	)
+		
 }
 
 
@@ -316,9 +338,10 @@ rtsplot.grid <- function
 	#abline( v = rtsplot.control$xaxis.ticks, col = 'lightgray', lty = 'dotted')
 	
 	# grid flag 'xy', 'x', 'y', '' or NA, NULL
-	graphics::abline( h = graphics::axTicks(2), col = col)
-	graphics::abline( v = xaxis.ticks, col = col)
+	grid = iif(is.null(grid) || is.na(grid), '', grid)
 	
+	if(grepl('x', grid)) graphics::abline( h = graphics::axTicks(2), col = col)
+	if(grepl('y', grid)) graphics::abline( v = xaxis.ticks, col = col)	
 }
 
 
@@ -332,6 +355,19 @@ rtsplot.grid <- function
 #'
 #' @return nothing
 #'
+#' @examples
+#'	y = rtsplot.fake.stock.data(1000)
+#'	symbol = 'SPY'
+#' 	
+#'  # moving average
+#'	sma = TTR::SMA(y, 250)
+#' 
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'l', col='black')
+#'  rtsplot.lines(sma, col='blue', lwd=1.5)
+#'	rtsplot.legend(c(symbol, 'SMA(250)'), 'black,blue', list(y,sma))
+#'
 #' @export 
 ###############################################################################
 rtsplot.lines <- function(
@@ -343,7 +379,7 @@ rtsplot.lines <- function(
 {
 	if(quantmod::has.Cl(y)) y1 = quantmod::Cl(y) else y1 = y[,1]	
 	
-	temp.x = attr(y, 'index')
+	temp.x = xts::.index(y)
 	
 	if( type == 'l' & len(col) > 1 ) {
 		for( icol in unique(col) ) {
@@ -363,6 +399,16 @@ rtsplot.lines <- function(
 #'
 #' @return nothing
 #'
+#' @examples
+#'	y = rtsplot.fake.stock.data(1000)
+#'	symbol = 'SPY'
+#' 	
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'l', col='black')
+#'  rtsplot.text(y[100], 'Text', col='red')
+#'	rtsplot.legend(symbol, 'black', y)
+#'
 #' @export 
 ###############################################################################
 rtsplot.text <- function(
@@ -372,7 +418,7 @@ rtsplot.text <- function(
 {
 	if(quantmod::has.Cl(y)) y1 = quantmod::Cl(y) else y1 = y[,1]	
 	
-	temp = attr(y1, 'index')
+	temp = xts::.index(y1)
 		# class(temp)='POSIXct' 
 	graphics::text(temp, y1, ...)
 }
@@ -418,6 +464,15 @@ rtsplot.format <- function(
 #' @param ... other parameters to legend, see \code{\link{legend}} function for more info
 #'
 #' @return nothing
+#'
+#' @examples
+#'	y = rtsplot.fake.stock.data(1000)
+#'	symbol = 'SPY'
+#' 	
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'l', col='black')
+#'	rtsplot.legend(symbol, 'black', y)
 #'
 #' @export 
 ###############################################################################
@@ -509,7 +564,7 @@ rtsplot.dx <- function
 	
 	# R by default extends xrange by 1.08
 	xlim = graphics::par('usr')[1:2]
-	xportion = min(1, diff(unclass(range(attr(y1, 'index'))))*1.08 / diff(xlim) )
+	xportion = min(1, diff(unclass(range(xts::.index(y1))))*1.08 / diff(xlim) )
 	return( xportion * diff(xlim) / ( 2* nrow(y1)  ) )
 }
 
@@ -564,7 +619,7 @@ rtsplot.x.highlight.helper <- function
 	if(graphics::par('ylog')) temp.y = 10^temp.y
 	
 	
-	temp.x = attr(y, 'index')		
+	temp.x = xts::.index(y)
 	for( i in seq(1,len(hl_index),2) ) {		
 		graphics::rect(temp.x[hl_index[i]] - dx/2, temp.y[1],
 			temp.x[hl_index[(i + 1)]] + dx/2, temp.y[2],
@@ -632,22 +687,54 @@ rtsplot.y.highlight <- function
 	#box();
 }
 
+
+
 ###############################################################################
-# rtsplot color helper functions for candles and volume
+#' Bar Colors for Candle and Volume plots
+#'
+#' @param y \code{\link{xts}} object
+#'
+#' @return colors
+#'
+#' @export
+#' @rdname Colors
 ###############################################################################
 rtsplot.candle.col <- function(	y ) {
 	theme = rtsplot.theme()
-	return( iif( quantmod::Cl(y) > quantmod::Op(y), theme$col.up, theme$col.dn) )
-}
-rtsplot.volume.col <- function( y ) { 
-	theme = rtsplot.theme()
-	return( iif( quantmod::Cl(y) > mlag(quantmod::Cl(y)), theme$col.up, theme$col.dn) )
+	iif( quantmod::Cl(y) > quantmod::Op(y), theme$col.up, theme$col.dn)
 }
 
+
+#' @export
+#' @rdname Colors
+rtsplot.volume.col <- function( y ) { 
+	theme = rtsplot.theme()
+	iif( quantmod::Cl(y) > mlag(quantmod::Cl(y)), theme$col.up, theme$col.dn)
+}
+
+
 ###############################################################################
-# rtsplot.candle - plot candles
-#  rtsplot.candle will try to plot candles if dx is sufficient
-#  otherwise ohlc or bars 
+#' Create Candle Plot
+#'
+#' Plot candles if dx is sufficient otherwise ohlc or bars 
+#'
+#' @param y \code{\link{xts}} object
+#' @param col color for bars, \strong{defaults to rtsplot.candle.col}
+#' @param border border color, \strong{defaults to rtsplot.theme()$col.border}
+#'
+#' @return nothing
+#'
+#' @examples
+#'	y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+#'	symbol = 'SPY'
+#' 	
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'n')
+#'  rtsplot.candle(y)
+#'	rtsplot.legend(symbol, 'black', y)
+#'
+#' @export
 ###############################################################################
 rtsplot.candle <- function
 (
@@ -665,7 +752,7 @@ rtsplot.candle <- function
 	} else if ( dxi0 < 1.75 ) {
 		rtsplot.ohlc.lwd(y, col = col, lwd = 1)
 	} else {
-		temp.x = attr(y, 'index')
+		temp.x = xts::.index(y)
 		
 		graphics::rect(temp.x - dx/10, quantmod::Lo(y), temp.x + dx/10, quantmod::Hi(y), 
 			col = border, border = border)
@@ -674,10 +761,28 @@ rtsplot.candle <- function
 	} 
 }
 
+
 ###############################################################################
-# rtsplot.ohlc - plot ohlc
-#  rtsplot.ohlc will try to plot ohlc if dx is sufficient
-#  otherwise ohlc or bars 
+#' Create OHLC Plot
+#'
+#' Plot ohlc if dx is sufficient otherwise bars 
+#'
+#' @param y \code{\link{xts}} object
+#' @param col color for bars, \strong{defaults to rtsplot.theme()$col.border}
+#'
+#' @return nothing
+#'
+#' @examples
+#'	y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+#'	symbol = 'SPY'
+#' 	
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'n')
+#'  rtsplot.ohlc(y)
+#'	rtsplot.legend(symbol, 'black', y)
+#'
+#' @export
 ###############################################################################
 rtsplot.ohlc <- function
 (
@@ -694,7 +799,7 @@ rtsplot.ohlc <- function
 	} else if ( dxi0 < 1.75 ) {
 		rtsplot.ohlc.lwd(y, col = col, lwd = 1)
 	} else {
-		temp.x = attr(y, 'index')
+		temp.x = xts::.index(y)
 		
 		graphics::rect(temp.x - dx/8, quantmod::Lo(y), temp.x + dx/8, quantmod::Hi(y), col = col, border = col)
 		graphics::segments(temp.x - dx/2, quantmod::Op(y), temp.x, quantmod::Op(y), col = col)	
@@ -702,8 +807,27 @@ rtsplot.ohlc <- function
 	}
 }
 
+
 ###############################################################################
-# rtsplot.hl - plot hl
+#' Create HL Plot
+#'
+#' @param y \code{\link{xts}} object
+#' @param col color for bars, \strong{defaults to rtsplot.volume.col}
+#' @param border border color, \strong{defaults to rtsplot.theme()$col.border}
+#'
+#' @return nothing
+#'
+#' @examples
+#'	y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+#'	symbol = 'SPY'
+#' 	
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'n')
+#'  rtsplot.hl(y)
+#'	rtsplot.legend(symbol, 'black', y)
+#'
+#' @export
 ###############################################################################
 rtsplot.hl <- function
 (
@@ -719,7 +843,7 @@ rtsplot.hl <- function
 	if( dxi0 < 1.75 ) {
 		rtsplot.hl.lwd(y, col = col, lwd = 1)
 	} else {
-		temp.x = attr(y, 'index')
+		temp.x = xts::.index(y)
 		
 		graphics::rect(temp.x - dx/2, quantmod::Lo(y), temp.x + dx/2, quantmod::Hi(y), 
 			col = col, border = border)
@@ -737,7 +861,7 @@ rtsplot.ohlc.lwd <- function
 )
 {
 	dx = rtsplot.dx(y)
-	temp.x = attr(y, 'index')	
+	temp.x = xts::.index(y)
 	
 	graphics::segments(temp.x, quantmod::Lo(y), temp.x, quantmod::Hi(y), lwd = lwd, lend = 2,  ...)
 	graphics::segments(temp.x - dx/2, quantmod::Op(y), temp.x, quantmod::Op(y), lwd = lwd, lend = 2, ...)
@@ -754,7 +878,7 @@ rtsplot.hl.lwd <- function
 	...					# other parameters to segments
 )
 {
-	temp.x = attr(y, 'index')	
+	temp.x = xts::.index(y)
 	
 	graphics::segments(temp.x, quantmod::Lo(y), temp.x, quantmod::Hi(y), lwd = lwd, lend = 2, ...)
 }
@@ -782,7 +906,7 @@ rtsplot.volume <- function
 	# convert dx to line width
 	dxi0 = ( dx / graphics::xinch() ) * 96
 	
-	temp.x = attr(y, 'index')	
+	temp.x = xts::.index(y)
 	
 	if( dxi0 < 1.75 ) {
 		graphics::segments(temp.x, 0, temp.x, quantmod::Vo(y), col = col, lwd = 1, lend = 2)	
@@ -1053,4 +1177,55 @@ rtsplot.corner.label = function(
 
 		if(match(space[1],"figure",0)) graphics::par(xpd=FALSE)
 	}	
+}
+
+
+###############################################################################
+#' Genearte fake stock data
+#'
+#' Generate fake stock data for use in rtsplot examples
+#'
+#' @param n number of points to generate
+#' @param y0 starting price, \strong{defaults to 10 }
+#' @param stdev standard deviation, \strong{defaults to 0.1}
+#' @param ohlc generate ohlc data, \strong{defaults to FALSE}
+#' @param method method to generate fake stock data, \strong{defaults to 'normal'}
+#'   two methods are implemented: 
+#'   * 'normal' - generate fake stock data assuming returns 
+#'   are normally distributed with zero drift
+#'   * 'uniform' - generate fake stock data assuming returns 
+#'   are uniformly distributed with zero drift
+#'
+#' @return \code{\link{xts}} object with fake stock data
+#'
+#' @examples
+#'  rtsplot.fake.stock.data(10)
+#'
+#' @export 
+###############################################################################
+rtsplot.fake.stock.data = function(
+	n, 
+	y0 = 10, 
+	stdev = 0.1, 
+	ohlc = FALSE,
+	method = c('normal', 'adhoc')
+) {
+	x =  seq(Sys.Date(), by = 'day', length.out = n)
+	
+	if(method[1] == 'normal') {
+		y = y0 + cumsum(stats::rnorm(n, sd = stdev))
+	} else {
+		#[Are there known techniques to generate realistic looking fake stock data?](https://stackoverflow.com/questions/8597731/are-there-known-techniques-to-generate-realistic-looking-fake-stock-data)
+		y = y0 + cumsum(2 * stdev * (stats::runif(n) - 0.5))
+	}
+	
+	if(!ohlc) return(xts::xts(y, x))
+	
+	high = y + stats::runif(n) * stdev / 2
+	low = y - stats::runif(n) * stdev / 2
+	open = (high + low) / 2
+	volume = stats::runif(n) * 100 * 1000
+	y = xts::xts(cbind(open, high, low, y, y, volume), x)
+	colnames(y) = spl('Open,High,Low,Close,Adjusted,Volume')
+	y
 }
