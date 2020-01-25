@@ -1,3 +1,8 @@
+## rtsplot 0.1.2
+
+* Added 'skip.breaks' parameter to the 'rtsplot' function to skip plotting of 
+  missing date/times. i.e. weekends, holidays, and nights(non-trading hours).
+
 ## rtsplot 0.1.1
 
 * Exposed internal functions to create candle, ohlc, hl plots.

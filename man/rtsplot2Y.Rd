@@ -4,8 +4,7 @@
 \alias{rtsplot2Y}
 \title{Plot time series with second Y axis}
 \usage{
-rtsplot2Y(y, las = 1, type = "l", col.axis = "red", ylim = NULL,
-  log = "", ...)
+rtsplot2Y(y, las = 1, type = "l", col.axis = "red", ylim = NULL, log = "", ...)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}

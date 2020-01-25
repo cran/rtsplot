@@ -4,9 +4,18 @@
 \alias{rtsplot.legend}
 \title{Plot legend - shortcut to the \code{\link{legend}} function}
 \usage{
-rtsplot.legend(labels, fill = NULL, lastobs = NULL, x = "topleft",
-  merge = FALSE, bty = "n", border = NA, yformat = rtsplot.format,
-  cex = 1, ...)
+rtsplot.legend(
+  labels,
+  fill = NULL,
+  lastobs = NULL,
+  x = "topleft",
+  merge = FALSE,
+  bty = "n",
+  border = NA,
+  yformat = rtsplot.format,
+  cex = 1,
+  ...
+)
 }
 \arguments{
 \item{labels}{legend labels}

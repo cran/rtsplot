@@ -4,9 +4,17 @@
 \alias{rtsplot.corner.label}
 \title{Plot corner label}
 \usage{
-rtsplot.corner.label(label = NULL, col = "black", x = -1, y = 1,
-  xoffset = NA, yoffset = NA, space = c("plot", "figure"), cex = 1,
-  border = NA)
+rtsplot.corner.label(
+  label = NULL,
+  col = "black",
+  x = -1,
+  y = 1,
+  xoffset = NA,
+  yoffset = NA,
+  space = c("plot", "figure"),
+  cex = 1,
+  border = NA
+)
 }
 \arguments{
 \item{label}{label}

@@ -4,8 +4,11 @@
 \alias{rtsplot.volume}
 \title{Plot volume}
 \usage{
-rtsplot.volume(y, col = rtsplot.volume.col(y),
-  border = rtsplot.theme()$col.border)
+rtsplot.volume(
+  y,
+  col = rtsplot.volume.col(y),
+  border = rtsplot.theme()$col.border
+)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}

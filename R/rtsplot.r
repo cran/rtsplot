@@ -105,7 +105,83 @@ rtsplot.colors = function(n) {
 	}
 	colors(n)
 }	
+
+
+###############################################################################
+# Translate date/time axis to categorical axis if skip.breaks flag provided 
+# in 'rtsplot' function to skip plotting missing date/times (i.e. nights and weekends)
+###############################################################################
+rtsplot.set.xaxis.map = function(map = NULL) options('rtsplot.map' = map)
+
+rtsplot.get.xaxis.map = function() getOption('rtsplot.map')
+
+# approxfun is only doing a linear interpolation; values outside of interval are set
+# at extremes. We need Linear extrapolation for 10% range outside of interval.
+rtsplot.create.xaxis.map = function(x0) {
+	n = length(x0)
+	dx = 0.1 * (x0[n] - x0[1])
+	dn = 0.1 * (n-1)
+	stats::approxfun(
+		c(x0[1] - dx, x0, x0[n] + dx), 
+		c(1 - dn, 1:n, n + dn),
+		rule=2, yleft = 1 - dn, yright = n + dn)
+}
+
+rtsplot.map.xaxis = function(y) {
+	temp.x = xts::.index(y)
+	map = rtsplot.get.xaxis.map()
+	if(!is.null(map))
+		map(temp.x)
+	else
+		temp.x
+}	
+
+rtsplot.xaxis = function(y) {
+	z = xts::.index(y)
+	n = length(z)
+	d = 1.1 * (z[n] - z[1])
+		
+	# use same format as axis.POSIXct - to be consistent
+	if (d < 1.1 * 60) {
+		format = "%S"
+	} else if (d < 1.1 * 3600) {
+		format = "%M:%S"
+	} else if (d < 1.1 * 3600 * 24) {
+        format = "%H:%M"
+    } else if (d < 2 * 3600 * 24) {
+        format = "%a %H:%M"
+    } else if (d < 7 * 3600 * 24) {
+        format = "%a"
+    } else if (d < 50 * 3600 * 24) {
+			format = "%b %d"
+	} else if (d < 1.1 * 365 * 3600 * 24) {
+		format = "%b"
+	} else {			
+		format = "%Y"
+	}		
 	
+	# use same logic to get breaks as in xts::axTicksByTime
+	tick.opts = c("years", "quarters", "months", "weeks", "days", "hours", "minutes", "seconds")
+	tick.k.opts = c(10, 5, 2, 1, 3, 6, 1, 1, 1, 4, 2, 1, 30, 15, 1, 1)
+	tick.opts = rep(tick.opts, c(4, 1, 2, 1, 1, 3, 3, 1))
+	is = structure(rep(0, length(tick.opts)), .Names = tick.opts)
+
+	# axis.POSIXct is using 5 breaks, the default setting in 'pretty'
+	for (i in 1:length(tick.opts)) {
+		ep = xts::endpoints(y, tick.opts[i], tick.k.opts[i])
+		is[i] = length(ep) - 1
+		if (is[i] > 5) break
+	}
+	loc = which.min(abs(is-6))
+	ep = xts::endpoints(y, tick.opts[loc], tick.k.opts[loc])
+	# remove first and last
+	ep = ep[2:(length(ep)-1)] + 1
+
+	# add labels
+	names(ep) = format(.POSIXct(z[ep], attr(z, "tzone")), format = format)
+	ep
+}
+
 
 ###############################################################################
 #' Plot function for time series
@@ -125,6 +201,7 @@ rtsplot.colors = function(n) {
 #' @param ylab Y label, \strong{defaults to ''}, for more info see \code{\link{plot}}
 #' @param ylim range on Y values, \strong{defaults to NULL}
 #' @param log log scale x, y, xy axes, \strong{defaults to ''}
+#' @param skip.breaks flag to skip plotting missing date/times (i.e. nights and weekends), \strong{defaults to FALSE}
 #' @param ... additional parameters to the \code{\link{plot}}
 #'
 #' @return nothing
@@ -133,14 +210,35 @@ rtsplot.colors = function(n) {
 #'	y = rtsplot.fake.stock.data(1000)
 #'	symbol = 'SPY'
 #' 	
-#' # simple example
-#' highlight = which(y < 10)
+#'  # simple example
+#'  highlight = which(y < 10)
 #' 
-#' # plot
-#' layout(1)
-#' rtsplot.theme.set(col.x.highlight=grDevices::adjustcolor('orange', 200/255))
+#'  # plot
+#'  layout(1)
+#'  rtsplot.theme.set(col.x.highlight=grDevices::adjustcolor('orange', 200/255))
 #' 		
-#' rtsplot(y, type = 'l', main = symbol, x.highlight = highlight)
+#'  rtsplot(y, type = 'l', main = symbol, x.highlight = highlight)
+#'
+#'
+#'  # 'skip.breaks' example with daily data
+#'  y = rtsplot.fake.stock.data(7, remove.non.trading = TRUE)
+#'  
+#'  layout(1:2)
+#'  rtsplot(y, type='b')
+#'		rtsplot.legend('skip.breaks=FALSE', text.col='red')
+#'  rtsplot(y, type='b', skip.breaks=TRUE)
+#'		rtsplot.legend('skip.breaks=TRUE', text.col='red')
+#'  
+#'
+#'  # 'skip.breaks' example with intra-day data
+#'  y = rtsplot.fake.stock.data(5*24*60, period = 'minute', remove.non.trading = TRUE)
+#'  
+#'  layout(1:2)
+#'  rtsplot(y, type='l')
+#'		rtsplot.legend('skip.breaks=FALSE', text.col='red')
+#'  rtsplot(y, type='l', skip.breaks=TRUE)
+#'		rtsplot.legend('skip.breaks=TRUE', text.col='red')
+#'  
 #' 
 #' @export 
 ###############################################################################
@@ -163,6 +261,7 @@ rtsplot <- function
 	ylab = '',			# Y label
 	ylim = NULL,		# range on Y values
 	log = '',			# log scale x, y, xy axes
+	skip.breaks = FALSE,# flag to skip plotting missing date/times (i.e. nights and weekends)
 	...					# other parameters to plot
 )
 {
@@ -184,7 +283,16 @@ rtsplot <- function
 	}
 		
 	# create plot frame, do not plot data
-	temp.x = xts::.index(y)
+	temp.x = xts::.index(y)	
+	
+	# create map if skip.breaks
+	if(skip.breaks) {
+		rtsplot.set.xaxis.map(rtsplot.create.xaxis.map(temp.x))
+		temp.x = 1:nrow(y)
+	} else
+		rtsplot.set.xaxis.map()
+
+		
 	graphics::plot( temp.x, y1, xlab = xlab, ylab = ylab, main = main,
 		frame.plot = FALSE,
 		type = 'n', yaxt = 'n', xaxt = 'n', ylim = ylim, log = log, ... )
@@ -198,12 +306,18 @@ rtsplot <- function
 		graphics::axis(4, las = las, col = NA, col.ticks = grid.color, cex.axis=cex)
 		
 		# plot X axis
-		class(temp.x) = c('POSIXct', 'POSIXt')	
-		xaxis.ticks = graphics::axis.POSIXct(1, temp.x,labels = plotX, tick = TRUE, 
+		if(skip.breaks) {
+			xaxis.ticks = rtsplot.xaxis(y)
+			graphics::axis(1, at = xaxis.ticks, labels = iif(plotX, names(xaxis.ticks), FALSE), tick = TRUE, 
+			col = NA, col.ticks = grid.color, cex.axis=cex)			
+		} else {
+			class(temp.x) = c('POSIXct', 'POSIXt')
+			xaxis.ticks = graphics::axis.POSIXct(1, temp.x,labels = plotX, tick = TRUE, 
 			col = NA, col.ticks = grid.color, cex.axis=cex)
-		# subticks tcl = -0.2
+			# subticks tcl = -0.2
+		}
+
 		
-				
 	# highlight logic
 	if( !is.null(x.highlight) ) rtsplot.x.highlight(y, x.highlight); 	
 	if( !is.null(y.highlight) ) rtsplot.y.highlight(y.highlight, y.highlight.col); 	
@@ -296,7 +410,7 @@ rtsplot2Y <- function(
 	
 	# create plot frame, do not plot data
 	graphics::par(new = TRUE)	
-	temp.x = xts::.index(y1)
+	temp.x = rtsplot.map.xaxis(y1)
 	graphics::plot( temp.x , y1, xlim = xlim, xaxs = 'i', type = 'n',
 		yaxt = 'n', xaxt = 'n', xlab = '', ylab = '', axes = FALSE, ylim = ylim, log = log, ... )
 		
@@ -379,8 +493,8 @@ rtsplot.lines <- function(
 {
 	if(quantmod::has.Cl(y)) y1 = quantmod::Cl(y) else y1 = y[,1]	
 	
-	temp.x = xts::.index(y)
-	
+	temp.x = rtsplot.map.xaxis(y)
+		
 	if( type == 'l' & len(col) > 1 ) {
 		for( icol in unique(col) ) {
 			graphics::lines(temp.x, iif(col == icol, y1, NA), type = type, col = icol, ...)
@@ -493,13 +607,22 @@ rtsplot.legend <- function
 	# split fill colors & labels
 	if( !is.null(fill) ) fill = spl( as.character(fill) )	
 	labels = spl( as.character(labels) )
+
+	# extract last observation, use Close if available; otherwise use first column 	
+	get.lastobs = function(x)
+		unclass(mlast(
+			if(quantmod::has.Cl(x))
+				quantmod::Cl(x)
+			else
+				x
+		))[1]
 	
 	# if last observations, add them to labels
 	if( !is.null(lastobs) ) {
 		if( is.list(lastobs) ) {
-			labels1 = sapply(lastobs, function(x) unclass(mlast(x))[1])
+			labels1 = sapply(lastobs, get.lastobs)
 		} else { 
-			labels1 = unclass(mlast(lastobs))[1]; 
+			labels1 = get.lastobs(lastobs)
 		}		
 		# format last observations
 		labels = paste(labels, match.fun(yformat)( labels1 ))		
@@ -619,7 +742,7 @@ rtsplot.x.highlight.helper <- function
 	if(graphics::par('ylog')) temp.y = 10^temp.y
 	
 	
-	temp.x = xts::.index(y)
+	temp.x = rtsplot.map.xaxis(y)
 	for( i in seq(1,len(hl_index),2) ) {		
 		graphics::rect(temp.x[hl_index[i]] - dx/2, temp.y[1],
 			temp.x[hl_index[(i + 1)]] + dx/2, temp.y[2],
@@ -752,7 +875,7 @@ rtsplot.candle <- function
 	} else if ( dxi0 < 1.75 ) {
 		rtsplot.ohlc.lwd(y, col = col, lwd = 1)
 	} else {
-		temp.x = xts::.index(y)
+		temp.x = rtsplot.map.xaxis(y)
 		
 		graphics::rect(temp.x - dx/10, quantmod::Lo(y), temp.x + dx/10, quantmod::Hi(y), 
 			col = border, border = border)
@@ -799,7 +922,7 @@ rtsplot.ohlc <- function
 	} else if ( dxi0 < 1.75 ) {
 		rtsplot.ohlc.lwd(y, col = col, lwd = 1)
 	} else {
-		temp.x = xts::.index(y)
+		temp.x = rtsplot.map.xaxis(y)
 		
 		graphics::rect(temp.x - dx/8, quantmod::Lo(y), temp.x + dx/8, quantmod::Hi(y), col = col, border = col)
 		graphics::segments(temp.x - dx/2, quantmod::Op(y), temp.x, quantmod::Op(y), col = col)	
@@ -843,7 +966,7 @@ rtsplot.hl <- function
 	if( dxi0 < 1.75 ) {
 		rtsplot.hl.lwd(y, col = col, lwd = 1)
 	} else {
-		temp.x = xts::.index(y)
+		temp.x = rtsplot.map.xaxis(y)
 		
 		graphics::rect(temp.x - dx/2, quantmod::Lo(y), temp.x + dx/2, quantmod::Hi(y), 
 			col = col, border = border)
@@ -861,7 +984,7 @@ rtsplot.ohlc.lwd <- function
 )
 {
 	dx = rtsplot.dx(y)
-	temp.x = xts::.index(y)
+	temp.x = rtsplot.map.xaxis(y)
 	
 	graphics::segments(temp.x, quantmod::Lo(y), temp.x, quantmod::Hi(y), lwd = lwd, lend = 2,  ...)
 	graphics::segments(temp.x - dx/2, quantmod::Op(y), temp.x, quantmod::Op(y), lwd = lwd, lend = 2, ...)
@@ -878,7 +1001,7 @@ rtsplot.hl.lwd <- function
 	...					# other parameters to segments
 )
 {
-	temp.x = xts::.index(y)
+	temp.x = rtsplot.map.xaxis(y)
 	
 	graphics::segments(temp.x, quantmod::Lo(y), temp.x, quantmod::Hi(y), lwd = lwd, lend = 2, ...)
 }
@@ -906,7 +1029,7 @@ rtsplot.volume <- function
 	# convert dx to line width
 	dxi0 = ( dx / graphics::xinch() ) * 96
 	
-	temp.x = xts::.index(y)
+	temp.x = rtsplot.map.xaxis(y)
 	
 	if( dxi0 < 1.75 ) {
 		graphics::segments(temp.x, 0, temp.x, quantmod::Vo(y), col = col, lwd = 1, lend = 2)	
@@ -1046,14 +1169,14 @@ rtsplot.stacked <- function
 
 
 ###############################################################################
-#' \code{\link{matplot}} version for \code{\link{xts}} object
+#' \code{\link[graphics]{matplot}} version for \code{\link[xts]{xts}} object
 #'
 #' @param y \code{\link{xts}} object
 #' @param dates subset of dates\strong{defaults to NULL}
 #' @param ylim range on Y values, \strong{defaults to NULL}
-#' @param type plot type, \strong{defaults to 'l'}, see \code{\link{plot}} for details
+#' @param type plot type, \strong{defaults to 'l'}, see \code{\link[graphics]{plot}} for details
 #' @param cols colors
-#' @param ... additional parameters to the \code{\link{matplot}}
+#' @param ... additional parameters to the \code{\link[graphics]{matplot}}
 #'
 #' @return nothing
 #'
@@ -1181,7 +1304,7 @@ rtsplot.corner.label = function(
 
 
 ###############################################################################
-#' Genearte fake stock data
+#' Generate fake stock data
 #'
 #' Generate fake stock data for use in rtsplot examples
 #'
@@ -1195,6 +1318,9 @@ rtsplot.corner.label = function(
 #'   are normally distributed with zero drift
 #'   * 'uniform' - generate fake stock data assuming returns 
 #'   are uniformly distributed with zero drift
+#' @param period frequency to generate fake stock data, (possible values: "day", "minute"),  \strong{defaults to "day"}
+#' @param remove.non.trading flag to remove non trading periods(i.e. weekends and non-trading hours).
+#'   Note, this flag likely will cause function return less than 'n' observation, \strong{defaults to FALSE}
 #'
 #' @return \code{\link{xts}} object with fake stock data
 #'
@@ -1208,9 +1334,32 @@ rtsplot.fake.stock.data = function(
 	y0 = 10, 
 	stdev = 0.1, 
 	ohlc = FALSE,
-	method = c('normal', 'adhoc')
+	method = c('normal', 'adhoc'),
+	period = c('day', 'minute'),
+	remove.non.trading = FALSE
 ) {
-	x =  seq(Sys.Date(), by = 'day', length.out = n)
+	if(period[1] == 'day')
+		x =  xts::xts(1:n, seq(Sys.Date(), by = 'day', length.out = n))
+	else {
+		order.by = seq(Sys.time(), by = 'min', length.out = n)
+		x =  xts::xts(1:n, order.by)		
+		
+		# remove non-trading hours
+		if(remove.non.trading) {
+			#x = x["T09:30/T16:00"]	
+			filter = as.numeric(format(order.by, '%H%M'))
+			x = x[(filter >= 930) & (filter <= 1600)]
+		}
+	}
+	
+	# remove weekends
+	if(remove.non.trading) x = x[xts::.indexwday(x) %in% 1:5]
+	
+	if(len(x) == 0) return(x)
+		
+	n = len(x)
+	x = zoo::index(x)				
+	
 	
 	if(method[1] == 'normal') {
 		y = y0 + cumsum(stats::rnorm(n, sd = stdev))
@@ -1218,7 +1367,7 @@ rtsplot.fake.stock.data = function(
 		#[Are there known techniques to generate realistic looking fake stock data?](https://stackoverflow.com/questions/8597731/are-there-known-techniques-to-generate-realistic-looking-fake-stock-data)
 		y = y0 + cumsum(2 * stdev * (stats::runif(n) - 0.5))
 	}
-	
+		
 	if(!ohlc) return(xts::xts(y, x))
 	
 	high = y + stats::runif(n) * stdev / 2

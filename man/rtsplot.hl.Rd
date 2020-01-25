@@ -4,8 +4,7 @@
 \alias{rtsplot.hl}
 \title{Create HL Plot}
 \usage{
-rtsplot.hl(y, col = rtsplot.volume.col(y),
-  border = rtsplot.theme()$col.border)
+rtsplot.hl(y, col = rtsplot.volume.col(y), border = rtsplot.theme()$col.border)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}

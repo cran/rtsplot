@@ -4,8 +4,15 @@
 \alias{rtsplot.stacked}
 \title{Create Stacked plot}
 \usage{
-rtsplot.stacked(x, y, xlab = "", cols = rtsplot.colors(ncol(y)),
-  type = c("l", "s"), flip.legend = FALSE, ...)
+rtsplot.stacked(
+  x,
+  y,
+  xlab = "",
+  cols = rtsplot.colors(ncol(y)),
+  type = c("l", "s"),
+  flip.legend = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{dates object}

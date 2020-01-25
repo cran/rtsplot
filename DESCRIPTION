@@ -1,7 +1,7 @@
 Package: rtsplot
 Type: Package
 Title: Time Series Plot
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(		
 	person(family = "RTSVizTeam", role = c("aut", "cph"), email = "rtsvizteam@gmail.com"),
 	person("Irina", "Kapler", role = c("cre"), email = "irkapler@gmail.com")
@@ -16,11 +16,11 @@ Suggests: TTR
 URL: https://bitbucket.org/rtsvizteam/rtsplot
 BugReports: https://bitbucket.org/rtsvizteam/rtsplot/issues
 LazyLoad: yes
-RoxygenNote: 6.1.0
+RoxygenNote: 7.0.2
 NeedsCompilation: no
-Packaged: 2018-09-15 19:29:20 UTC; pcadmin
+Packaged: 2020-01-24 01:21:30 UTC; pcadmin
 Author: RTSVizTeam [aut, cph],
   Irina Kapler [cre]
 Maintainer: Irina Kapler <irkapler@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-09-15 19:50:03 UTC
+Date/Publication: 2020-01-25 05:50:02 UTC

@@ -4,8 +4,11 @@
 \alias{rtsplot.candle}
 \title{Create Candle Plot}
 \usage{
-rtsplot.candle(y, col = rtsplot.candle.col(y),
-  border = rtsplot.theme()$col.border)
+rtsplot.candle(
+  y,
+  col = rtsplot.candle.col(y),
+  border = rtsplot.theme()$col.border
+)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}

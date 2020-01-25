@@ -64,3 +64,31 @@ Example :
 ```
 
 
+
+Example **skip.breaks** flag: skip plotting missing date/times (i.e. nights and weekends)
+===
+
+```R
+	library(rtsplot)
+	
+	# 'skip.breaks' example with daily data
+	y = rtsplot.fake.stock.data(7, remove.non.trading = TRUE)
+  
+	layout(1:2)
+	rtsplot(y, type='b')
+		rtsplot.legend('skip.breaks=FALSE', text.col='red')
+	rtsplot(y, type='b', skip.breaks=TRUE)
+		rtsplot.legend('skip.breaks=TRUE', text.col='red')
+
+
+	# 'skip.breaks' example with intra-day data
+	y = rtsplot.fake.stock.data(5*24*60, period = 'minute', remove.non.trading = TRUE)
+
+	layout(1:2)
+	rtsplot(y, type='l')
+		rtsplot.legend('skip.breaks=FALSE', text.col='red')
+	rtsplot(y, type='l', skip.breaks=TRUE)
+		rtsplot.legend('skip.breaks=TRUE', text.col='red')
+```
+
+

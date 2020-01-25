@@ -7,10 +7,17 @@
 \alias{rtsplot.colors}
 \title{Theme}
 \usage{
-register.theme(grid.color = "gray90", colors = "Set1",
-  col.border = "black", col.up = "green", col.dn = "red",
-  col.x.highlight = "orange", col.y.highlight = "orange", cex = 1,
-  legend.bg.col = grDevices::adjustcolor("white", 200/255))
+register.theme(
+  grid.color = "gray90",
+  colors = "Set1",
+  col.border = "black",
+  col.up = "green",
+  col.dn = "red",
+  col.x.highlight = "orange",
+  col.y.highlight = "orange",
+  cex = 1,
+  legend.bg.col = grDevices::adjustcolor("white", 200/255)
+)
 
 rtsplot.theme()
 

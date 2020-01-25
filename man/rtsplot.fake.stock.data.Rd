@@ -2,10 +2,17 @@
 % Please edit documentation in R/rtsplot.r
 \name{rtsplot.fake.stock.data}
 \alias{rtsplot.fake.stock.data}
-\title{Genearte fake stock data}
+\title{Generate fake stock data}
 \usage{
-rtsplot.fake.stock.data(n, y0 = 10, stdev = 0.1, ohlc = FALSE,
-  method = c("normal", "adhoc"))
+rtsplot.fake.stock.data(
+  n,
+  y0 = 10,
+  stdev = 0.1,
+  ohlc = FALSE,
+  method = c("normal", "adhoc"),
+  period = c("day", "minute"),
+  remove.non.trading = FALSE
+)
 }
 \arguments{
 \item{n}{number of points to generate}
@@ -22,6 +29,11 @@ two methods are implemented:
 are normally distributed with zero drift
 * 'uniform' - generate fake stock data assuming returns 
 are uniformly distributed with zero drift}
+
+\item{period}{frequency to generate fake stock data, (possible values: "day", "minute"),  \strong{defaults to "day"}}
+
+\item{remove.non.trading}{flag to remove non trading periods(i.e. weekends and non-trading hours).
+Note, this flag likely will cause function return less than 'n' observation, \strong{defaults to FALSE}}
 }
 \value{
 \code{\link{xts}} object with fake stock data

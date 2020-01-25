@@ -3,13 +3,26 @@
 \docType{package}
 \name{rtsplot}
 \alias{rtsplot}
-\alias{rtsplot-package}
 \title{`rtsplot` - Time series plot with base R Graphics.}
 \usage{
-rtsplot(y, main = NULL, plotX = TRUE, LeftMargin = 0, grid = "xy",
-  x.highlight = NULL, y.highlight = NULL, y.highlight.col = NULL,
-  las = 1, type = "l", xlab = "", ylab = "", ylim = NULL,
-  log = "", ...)
+rtsplot(
+  y,
+  main = NULL,
+  plotX = TRUE,
+  LeftMargin = 0,
+  grid = "xy",
+  x.highlight = NULL,
+  y.highlight = NULL,
+  y.highlight.col = NULL,
+  las = 1,
+  type = "l",
+  xlab = "",
+  ylab = "",
+  ylim = NULL,
+  log = "",
+  skip.breaks = FALSE,
+  ...
+)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}
@@ -40,6 +53,8 @@ also support 'ohlc', 'hl', 'candle', 'volume' types}
 \item{ylim}{range on Y values, \strong{defaults to NULL}}
 
 \item{log}{log scale x, y, xy axes, \strong{defaults to ''}}
+
+\item{skip.breaks}{flag to skip plotting missing date/times (i.e. nights and weekends), \strong{defaults to FALSE}}
 
 \item{...}{additional parameters to the \code{\link{plot}}}
 }
@@ -78,13 +93,34 @@ rtsplot.legend('RSI(20)', 'black', rsi)
 y = rtsplot.fake.stock.data(1000)
 symbol = 'SPY'
 	
-# simple example
-highlight = which(y < 10)
+ # simple example
+ highlight = which(y < 10)
 
-# plot
-layout(1)
-rtsplot.theme.set(col.x.highlight=grDevices::adjustcolor('orange', 200/255))
+ # plot
+ layout(1)
+ rtsplot.theme.set(col.x.highlight=grDevices::adjustcolor('orange', 200/255))
 		
-rtsplot(y, type = 'l', main = symbol, x.highlight = highlight)
+ rtsplot(y, type = 'l', main = symbol, x.highlight = highlight)
+
+
+ # 'skip.breaks' example with daily data
+ y = rtsplot.fake.stock.data(7, remove.non.trading = TRUE)
+ 
+ layout(1:2)
+ rtsplot(y, type='b')
+	rtsplot.legend('skip.breaks=FALSE', text.col='red')
+ rtsplot(y, type='b', skip.breaks=TRUE)
+	rtsplot.legend('skip.breaks=TRUE', text.col='red')
+ 
+
+ # 'skip.breaks' example with intra-day data
+ y = rtsplot.fake.stock.data(5*24*60, period = 'minute', remove.non.trading = TRUE)
+ 
+ layout(1:2)
+ rtsplot(y, type='l')
+	rtsplot.legend('skip.breaks=FALSE', text.col='red')
+ rtsplot(y, type='l', skip.breaks=TRUE)
+	rtsplot.legend('skip.breaks=TRUE', text.col='red')
+ 
 
 }

@@ -2,10 +2,16 @@
 % Please edit documentation in R/rtsplot.r
 \name{rtsplot.matplot}
 \alias{rtsplot.matplot}
-\title{\code{\link{matplot}} version for \code{\link{xts}} object}
+\title{\code{\link[graphics]{matplot}} version for \code{\link[xts]{xts}} object}
 \usage{
-rtsplot.matplot(y, dates = NULL, ylim = NULL, type = "l",
-  cols = rtsplot.colors(ncol(y)), ...)
+rtsplot.matplot(
+  y,
+  dates = NULL,
+  ylim = NULL,
+  type = "l",
+  cols = rtsplot.colors(ncol(y)),
+  ...
+)
 }
 \arguments{
 \item{y}{\code{\link{xts}} object}
@@ -14,15 +20,15 @@ rtsplot.matplot(y, dates = NULL, ylim = NULL, type = "l",
 
 \item{ylim}{range on Y values, \strong{defaults to NULL}}
 
-\item{type}{plot type, \strong{defaults to 'l'}, see \code{\link{plot}} for details}
+\item{type}{plot type, \strong{defaults to 'l'}, see \code{\link[graphics]{plot}} for details}
 
 \item{cols}{colors}
 
-\item{...}{additional parameters to the \code{\link{matplot}}}
+\item{...}{additional parameters to the \code{\link[graphics]{matplot}}}
 }
 \value{
 nothing
 }
 \description{
-\code{\link{matplot}} version for \code{\link{xts}} object
+\code{\link[graphics]{matplot}} version for \code{\link[xts]{xts}} object
 }
