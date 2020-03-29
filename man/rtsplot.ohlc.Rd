@@ -18,7 +18,7 @@ nothing
 Plot ohlc if dx is sufficient otherwise bars
 }
 \examples{
-y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+y = rtsplot.fake.stock.data(50, ohlc=TRUE)
 symbol = 'SPY'
 	
  # plot

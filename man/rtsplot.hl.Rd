@@ -20,7 +20,7 @@ nothing
 Create HL Plot
 }
 \examples{
-y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+y = rtsplot.fake.stock.data(50, ohlc=TRUE)
 symbol = 'SPY'
 	
  # plot

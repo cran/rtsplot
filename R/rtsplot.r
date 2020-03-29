@@ -221,7 +221,7 @@ rtsplot.xaxis = function(y) {
 #'
 #'
 #'  # 'skip.breaks' example with daily data
-#'  y = rtsplot.fake.stock.data(7, remove.non.trading = TRUE)
+#'  y = rtsplot.fake.stock.data(10, remove.non.trading = TRUE)
 #'  
 #'  layout(1:2)
 #'  rtsplot(y, type='b')
@@ -761,17 +761,18 @@ rtsplot.x.highlight.helper <- function
 #' @return nothing
 #'
 #' @examples
-#' \donttest{ 
-#' # download data
-#' data.spy = getSymbols('SPY', auto.assign = FALSE)
-#' rsi = RSI(Cl(data.spy), 20)
+#' # generate time series data
+#' y = rtsplot.fake.stock.data(1000)
+#' 
+#' rsi = TTR::RSI(y, 20)	
 #'  	
 #' #set up two regions for graphs candlestick price data on top 2/3 of the plot
 #' #and rsi on the bottom 1/3 of the plot
 #' layout(c(1,1,2))  
 #' 	
-#' rtsplot(data.spy, type = 'candle', plotX = FALSE)
-#'   rtsplot.legend('SPY', 'grey70', data.spy)
+#' rtsplot(y, type = 'line', plotX = FALSE)
+#'   rtsplot.legend('SPY', 'grey70', y)
+#' 
 #' rtsplot(rsi, type = 'l')
 #' 
 #' col = grDevices::adjustcolor(c('green','red'), 80/255)
@@ -780,9 +781,8 @@ rtsplot.x.highlight.helper <- function
 #' 	
 #' abline(h = 50, col = 'gray20')
 #' 
-#'   col = iif(mlast(rsi)>50,'black','red')
-#' rtsplot.legend('RSI(20)', col, rsi, text.col=col)
-#' }
+#' rtsplot.legend('RSI(20)', 'black', rsi)
+#' 
 #' @export 
 ###############################################################################
 rtsplot.y.highlight <- function
@@ -848,7 +848,7 @@ rtsplot.volume.col <- function( y ) {
 #' @return nothing
 #'
 #' @examples
-#'	y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+#'	y = rtsplot.fake.stock.data(50, ohlc=TRUE)
 #'	symbol = 'SPY'
 #' 	
 #'  # plot
@@ -896,7 +896,7 @@ rtsplot.candle <- function
 #' @return nothing
 #'
 #' @examples
-#'	y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+#'	y = rtsplot.fake.stock.data(50, ohlc=TRUE)
 #'	symbol = 'SPY'
 #' 	
 #'  # plot
@@ -941,7 +941,7 @@ rtsplot.ohlc <- function
 #' @return nothing
 #'
 #' @examples
-#'	y = rtsplot.fake.stock.data(100, ohlc=TRUE)
+#'	y = rtsplot.fake.stock.data(50, ohlc=TRUE)
 #'	symbol = 'SPY'
 #' 	
 #'  # plot

@@ -104,7 +104,7 @@ symbol = 'SPY'
 
 
  # 'skip.breaks' example with daily data
- y = rtsplot.fake.stock.data(7, remove.non.trading = TRUE)
+ y = rtsplot.fake.stock.data(10, remove.non.trading = TRUE)
  
  layout(1:2)
  rtsplot(y, type='b')

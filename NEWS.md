@@ -1,3 +1,7 @@
+## rtsplot 0.1.3
+
+* Fix donttest examples for CRAN
+
 ## rtsplot 0.1.2
 
 * Added 'skip.breaks' parameter to the 'rtsplot' function to skip plotting of 
