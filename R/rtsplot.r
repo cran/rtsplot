@@ -1210,7 +1210,7 @@ rtsplot.matplot <- function
 			for( i in 2:n ) rtsplot.lines(y[[i]], col = cols[i], type = type, ...)
 		}
 
-		rtsplot.legend(names(y), paste(1:n), y)	
+		rtsplot.legend(names(y), fill=cols, y)	
 				
 	} else {
 		n = ncol(y)
@@ -1222,7 +1222,7 @@ rtsplot.matplot <- function
 			for( i in 2:n ) rtsplot.lines(y[,i], col = cols[i], type = type, ...)
 		}
 		
-		rtsplot.legend(names(y), paste(1:n), as.list(y))	
+		rtsplot.legend(names(y), fill=cols, as.list(y))	
 	}	
 }
 
