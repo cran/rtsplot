@@ -21,6 +21,7 @@ rtsplot(
   ylim = NULL,
   log = "",
   skip.breaks = FALSE,
+  xaxis.map = rtsplot.create.xaxis.map,
   ...
 )
 }
@@ -55,6 +56,8 @@ also support 'ohlc', 'hl', 'candle', 'volume' types}
 \item{log}{log scale x, y, xy axes, \strong{defaults to ''}}
 
 \item{skip.breaks}{flag to skip plotting missing date/times (i.e. nights and weekends), \strong{defaults to FALSE}}
+
+\item{xaxis.map}{xaxis map function used if skip.breaks is TRUE, \strong{defaults to rtsplot.create.xaxis.map}}
 
 \item{...}{additional parameters to the \code{\link{plot}}}
 }

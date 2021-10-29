@@ -1,3 +1,7 @@
+## rtsplot 0.1.4
+
+* Added 'rtsplot.polygon' function to plot polygon time series.
+
 ## rtsplot 0.1.3
 
 * Fix donttest examples for CRAN

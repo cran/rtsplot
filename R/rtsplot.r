@@ -202,6 +202,7 @@ rtsplot.xaxis = function(y) {
 #' @param ylim range on Y values, \strong{defaults to NULL}
 #' @param log log scale x, y, xy axes, \strong{defaults to ''}
 #' @param skip.breaks flag to skip plotting missing date/times (i.e. nights and weekends), \strong{defaults to FALSE}
+#' @param xaxis.map xaxis map function used if skip.breaks is TRUE, \strong{defaults to rtsplot.create.xaxis.map}
 #' @param ... additional parameters to the \code{\link{plot}}
 #'
 #' @return nothing
@@ -262,6 +263,7 @@ rtsplot <- function
 	ylim = NULL,		# range on Y values
 	log = '',			# log scale x, y, xy axes
 	skip.breaks = FALSE,# flag to skip plotting missing date/times (i.e. nights and weekends)
+	xaxis.map = rtsplot.create.xaxis.map, # xaxis map function used if skip.breaks is TRUE
 	...					# other parameters to plot
 )
 {
@@ -287,7 +289,7 @@ rtsplot <- function
 	
 	# create map if skip.breaks
 	if(skip.breaks) {
-		rtsplot.set.xaxis.map(rtsplot.create.xaxis.map(temp.x))
+		rtsplot.set.xaxis.map(xaxis.map(temp.x))
 		temp.x = 1:nrow(y)
 	} else
 		rtsplot.set.xaxis.map()
@@ -502,6 +504,53 @@ rtsplot.lines <- function(
 	} else {
 		graphics::lines(temp.x, y1, type = type, col = col, ...)
 	}
+}
+
+
+###############################################################################
+#' Add polygon to time series plot
+#'
+#' @param y \code{\link{xts}} object with 2 columns
+#' @param col color, \strong{defaults to par('col')}
+#' @param ... additional parameters to the \code{\link{lines}}
+#'
+#' @return nothing
+#'
+#' @examples
+#'	y = rtsplot.fake.stock.data(1000, ohlc=TRUE) 
+#'	symbol = 'SPY'
+#' 	
+#'  # moving average
+#'	bbands = TTR::BBands(quantmod::HLC(y), n=200, sd=1)[,c('up','dn')]	
+#' 
+#'  # plot
+#'  layout(1)
+#'  rtsplot(y, type = 'l', col='black')
+#'  col = grDevices::adjustcolor('green', 50/255)
+#'  rtsplot.polygon(bbands, col = col)
+#'	rtsplot.legend(c(symbol, 'BBands'), c('black', col), list(y,bbands))
+#'
+#' @export 
+###############################################################################
+rtsplot.polygon <- function
+(
+	y,					# xts object to plot
+	col = graphics::par('col'),	# color
+	...					# other parameters to lines
+)
+{
+	if(is.null(ncol(y)) || ncol(y) < 2) {
+		warning('rtsplot.polygon: y must have 2 columns')
+		return()
+	}
+	
+	x = rtsplot.map.xaxis(y)
+	y = zoo::coredata(y[, 1:2])
+	
+	prep.x = c(x[1], x, x[len(x):1])
+	prep.y = c(y[1,1], y[,2], rev(y[,1]))
+	
+	graphics::polygon(prep.x, prep.y, border = NA, col = col, ...) 
 }
 
 
@@ -904,6 +953,10 @@ rtsplot.candle <- function
 #'  rtsplot(y, type = 'n')
 #'  rtsplot.ohlc(y)
 #'	rtsplot.legend(symbol, 'black', y)
+#'
+#'	rtsplot.theme.set(legend.bg.col=grDevices::adjustcolor('blue', 25/255))
+#'	rtsplot.corner.label('Logo \uA9', x=1, y=-1, cex = 0.7, space='figure', col='blue')
+#'	rtsplot.theme.set(legend.bg.col = grDevices::adjustcolor('white', 200/255))
 #'
 #' @export
 ###############################################################################

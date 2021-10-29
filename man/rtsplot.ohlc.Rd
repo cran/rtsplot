@@ -27,4 +27,8 @@ symbol = 'SPY'
  rtsplot.ohlc(y)
 rtsplot.legend(symbol, 'black', y)
 
+rtsplot.theme.set(legend.bg.col=grDevices::adjustcolor('blue', 25/255))
+rtsplot.corner.label('Logo \uA9', x=1, y=-1, cex = 0.7, space='figure', col='blue')
+rtsplot.theme.set(legend.bg.col = grDevices::adjustcolor('white', 200/255))
+
 }

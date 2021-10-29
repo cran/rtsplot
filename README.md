@@ -1,3 +1,8 @@
+---
+title: "rtsplot"
+---
+<!-- README.md is generated from README.Rmd. Please edit that file --> 
+
 rtsplot
 ====
 
@@ -15,13 +20,15 @@ Installation:
 The current release is available on [CRAN](https://CRAN.R-project.org/package=rtsplot),
 which you can install via:
 
+
 ```r
 install.packages("rtsplot")
 ```
 
 To install the development version run following code:
 
-```R
+
+```r
 remotes::install_bitbucket("rtsvizteam/rtsplot")
 ```
 	
@@ -29,7 +36,8 @@ remotes::install_bitbucket("rtsvizteam/rtsplot")
 Example :
 ===
 
-```R
+
+```r
 	library(quantmod)
 	
 	symbol = 'AAPL'
@@ -60,15 +68,17 @@ Example :
 		y.highlight.col = grDevices::adjustcolor(c('green','red'), 50/255)
 	)	
 	rtsplot.legend('RSI(20)', 'black', rsi)
-
 ```
+
+![plot of chunk plot-3](/man/figures/README/plot-3-1.png)
 
 
 
 Example **skip.breaks** flag: skip plotting missing date/times (i.e. nights and weekends)
 ===
 
-```R
+
+```r
 	library(rtsplot)
 	
 	# 'skip.breaks' example with daily data
@@ -79,8 +89,11 @@ Example **skip.breaks** flag: skip plotting missing date/times (i.e. nights and 
 		rtsplot.legend('skip.breaks=FALSE', text.col='red')
 	rtsplot(y, type='b', skip.breaks=TRUE)
 		rtsplot.legend('skip.breaks=TRUE', text.col='red')
+```
 
+![plot of chunk plot-4](/man/figures/README/plot-4-1.png)
 
+```r
 	# 'skip.breaks' example with intra-day data
 	y = rtsplot.fake.stock.data(5*24*60, period = 'minute', remove.non.trading = TRUE)
 
@@ -90,5 +103,7 @@ Example **skip.breaks** flag: skip plotting missing date/times (i.e. nights and 
 	rtsplot(y, type='l', skip.breaks=TRUE)
 		rtsplot.legend('skip.breaks=TRUE', text.col='red')
 ```
+
+![plot of chunk plot-4](/man/figures/README/plot-4-2.png)
 
 
