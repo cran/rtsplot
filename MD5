@@ -1,9 +1,9 @@
-ab3088b0a9259a7f46cc0518ed202875 *DESCRIPTION
+7e1885988aa281221d6f1d867dbb8017 *DESCRIPTION
 3d8026b5cadce2b78737803844b70044 *LICENSE
 ec3193dc9c6b43c3622030526e48ca30 *NAMESPACE
 62371e5b346312f2bddcf3c2d7a689ee *NEWS.md
-5c201a93b933e7674eb64c3d32b45f06 *R/rtsplot.r
-d20bb3b65321433ca9e7a8b627ea5b89 *R/utils.r
+183530c52d39694678bdde7214a684b2 *R/rtsplot.r
+3d74d64d2dc6dd0d8a3c2fea65f95e1b *R/utils.r
 75664d24da74b2e2f5eb50064de52ab3 *R/zzz.r
 e8ac7ab53ba931cd0584f9d48dceb63b *README.md
 0706ac3e42797fdc3e5887e80d07405f *man/Colors.Rd
@@ -11,7 +11,7 @@ d9e7eec54c2129fd30671addbe707cd8 *man/Themes.Rd
 567fb66f0412c65fe35252c14e17a2e5 *man/figures/README/plot-3-1.png
 dbbe4bbd66cac5f8d7f6c9de42a2462b *man/figures/README/plot-4-1.png
 199df1753eb5c66ef11b1947d7632370 *man/figures/README/plot-4-2.png
-1132a523e41ac638e688758b917d95f0 *man/rtsplot.Rd
+cd5dc526e4ac8f530c6e2a94762304cb *man/rtsplot.Rd
 6f6d84784f9ee14ab526a69aecfd05ba *man/rtsplot.candle.Rd
 82a373c1f18e266d53b9b28d3dde58e6 *man/rtsplot.corner.label.Rd
 8ed26a98a2edf7024eec9f7543f2c19f *man/rtsplot.fake.stock.data.Rd

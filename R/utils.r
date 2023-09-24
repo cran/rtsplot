@@ -30,8 +30,6 @@ mlag = function(m, nlag=1)
 
 spl = function(s, delim = ',') unlist(strsplit(s,delim))
 
-rep.row = function(m, nr) matrix(m, nrow=nr, ncol=len(m), byrow=TRUE)
-
 trim = function(s) sub('\\s+$', '', sub('^\\s+', '', s))
 
 make.copy = function(x, default) { out = x; out[] = default; out }

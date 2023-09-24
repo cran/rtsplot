@@ -3,6 +3,7 @@
 \docType{package}
 \name{rtsplot}
 \alias{rtsplot}
+\alias{rtsplot-package}
 \title{`rtsplot` - Time series plot with base R Graphics.}
 \usage{
 rtsplot(
@@ -125,5 +126,22 @@ symbol = 'SPY'
  rtsplot(y, type='l', skip.breaks=TRUE)
 	rtsplot.legend('skip.breaks=TRUE', text.col='red')
  
+
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://bitbucket.org/rtsvizteam/rtsplot}
+  \item Report bugs at \url{https://bitbucket.org/rtsvizteam/rtsplot/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Irina Kapler \email{irkapler@gmail.com}
+
+Authors:
+\itemize{
+  \item  RTSVizTeam \email{rtsvizteam@gmail.com} [copyright holder]
+}
 
 }
